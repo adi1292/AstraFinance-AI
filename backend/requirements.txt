@@ -1,0 +1,62 @@
+# ==========================
+# FastAPI
+# ==========================
+fastapi
+uvicorn[standard]
+
+# ==========================
+# Environment
+# ==========================
+python-dotenv
+pydantic
+pydantic-settings
+
+# ==========================
+# Database
+# ==========================
+motor
+pymongo
+chromadb
+
+# ==========================
+# LangChain
+# ==========================
+langchain
+langchain-community
+langchain-google-genai
+
+# ==========================
+# Authentication
+# ==========================
+python-jose[cryptography]
+passlib[bcrypt]
+Authlib
+
+# ==========================
+# HTTP
+# ==========================
+httpx
+requests
+
+# ==========================
+# File Upload
+# ==========================
+python-multipart
+
+# ==========================
+# Logging
+# ==========================
+loguru
+
+# ==========================
+# Testing
+# ==========================
+pytest
+pytest-asyncio
+
+# ==========================
+# Code Quality
+# ==========================
+black
+isort
+flake8

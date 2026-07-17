@@ -1,37 +1,63 @@
 import json
-from groq import Groq
-from app.config.groq_config import GROQ_API_KEY
+import os
+
+from langchain_groq import ChatGroq
+from langchain_core.prompts import ChatPromptTemplate
 
 
-class ExtractionAgent:
+class RedFlagAgent:
 
     def __init__(self):
-        self.client = Groq(api_key=GROQ_API_KEY)
 
-    def extract_financial_data(self, document_text):
-
-        prompt = f"""
-Extract the important financial information from the document.
-
-Return ONLY JSON.
-
-Document:
-{document_text}
-"""
-
-        response = self.client.chat.completions.create(
+        self.llm = ChatGroq(
             model="llama-3.3-70b-versatile",
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ]
+            api_key=os.getenv("GROQ_API_KEY"),
+            temperature=0
         )
 
-        result = response.choices[0].message.content.strip()
+        self.prompt = ChatPromptTemplate.from_messages([
+            (
+                "system",
+                """
+You are a Financial Risk Analysis Agent.
 
-        if result.startswith("```json"):
-            result = result.replace("```json", "").replace("```", "").strip()
+Analyze the extracted financial information.
 
-        return json.loads(result)
+Detect:
+
+- High liabilities
+- Low profit
+- Revenue decline
+- Missing financial data
+- Any financial risk
+
+Return ONLY valid JSON.
+
+{
+    "risk_level":"",
+    "red_flags":[],
+    "recommendations":[]
+}
+"""
+            ),
+            ("human", "{financial_data}")
+        ])
+
+        self.chain = self.prompt | self.llm
+
+    def analyze(self, extracted_data):
+
+        response = self.chain.invoke(
+            {"financial_data": str(extracted_data)}
+        )
+
+        try:
+            return json.loads(response.content)
+
+        except:
+
+            return {
+                "risk_level": "Unknown",
+                "red_flags": [],
+                "recommendations": []
+            }

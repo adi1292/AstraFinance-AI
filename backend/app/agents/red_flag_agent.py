@@ -1,38 +1,101 @@
+import os
 import json
-from groq import Groq
-from app.config.groq_config import GROQ_API_KEY
+
+from dotenv import load_dotenv
+from langchain_groq import ChatGroq
+from langchain_core.prompts import ChatPromptTemplate
+
+load_dotenv()
 
 
 class RedFlagAgent:
 
     def __init__(self):
-        self.client = Groq(api_key=GROQ_API_KEY)
 
-    def analyze_financial_risk(self, financial_data):
+        self.llm = ChatGroq(
+            model=os.getenv("MODEL_NAME", "llama-3.3-70b-versatile"),
+            api_key=os.getenv("GROQ_API_KEY"),
+            temperature=0
+        )
 
-        prompt = f"""
-Analyze the following financial data.
+        self.prompt = ChatPromptTemplate.from_messages(
+            [
+                (
+                    "system",
+                    """
+You are an expert Financial Risk Analysis Agent.
 
-Return ONLY JSON.
+Analyze the financial data and identify financial risks.
 
-Financial Data:
+Return ONLY valid JSON.
 
-{json.dumps(financial_data, indent=4)}
+{{
+    "risk_level": "",
+    "red_flags": [],
+    "recommendations": []
+}}
+
+Rules:
+- Risk level must be Low, Medium or High.
+- red_flags must be a JSON array.
+- recommendations must be a JSON array.
+- Do not return markdown.
+- Do not return explanations.
+- Return only JSON.
 """
-
-        response = self.client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt
-                }
+                ),
+                (
+                    "human",
+                    "{financial_data}"
+                )
             ]
         )
 
-        result = response.choices[0].message.content.strip()
+        self.chain = self.prompt | self.llm
 
-        if result.startswith("```json"):
-            result = result.replace("```json", "").replace("```", "").strip()
+    def analyze(self, financial_data):
 
-        return json.loads(result)
+        response = self.chain.invoke(
+            {
+                "financial_data": json.dumps(financial_data, indent=2)
+            }
+        )
+
+        output = response.content.strip()
+
+        if output.startswith("```json"):
+            output = output.replace("```json", "").replace("```", "").strip()
+
+        try:
+            return json.loads(output)
+
+        except Exception:
+
+            return {
+                "risk_level": "Unknown",
+                "red_flags": [],
+                "recommendations": [],
+                "raw_response": output
+            }
+
+
+if __name__ == "__main__":
+
+    sample_data = {
+        "company_name": "ABC Pvt Ltd",
+        "revenue": "1200000",
+        "expenses": "800000",
+        "net_profit": "400000",
+        "assets": "3500000",
+        "liabilities": "1800000",
+        "financial_ratios": {
+            "current_ratio": "1.8",
+            "debt_to_equity_ratio": "1.4"
+        }
+    }
+
+    agent = RedFlagAgent()
+
+    result = agent.analyze(sample_data)
+
+    print(json.dumps(result, indent=4))

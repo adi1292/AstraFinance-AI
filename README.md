@@ -28,6 +28,8 @@ The system is centered around three principles:
 2. Split work across specialized agents instead of one monolithic assistant.
 3. Make long-running document, embedding, and reporting pipelines visible to the user.
 
+> 🧠 **Note for AI Contributors**: Please refer to [MEMORY.md](MEMORY.md) for a detailed, persistent track record of what has been implemented so far to avoid analyzing the entire codebase from scratch.
+
 The repository currently combines:
 
 - A backend application scaffold under `backend/app/`
@@ -110,7 +112,7 @@ The risk workflow surfaces anomalies, omissions, and suspicious patterns that de
 
 ### 5. Research Assistant Experience
 
-The research flow combines retrieval, prompt orchestration, and citations so the user can ask questions conversationally without losing traceability.
+The research flow combines retrieval, prompt orchestration, and citations so the user can ask questions conversationally without losing traceability. Users can also directly attach files and images within the chat for dynamic multi-modal context.
 
 ### 6. Report Generation
 
@@ -190,7 +192,7 @@ sequenceDiagram
 The documented product experience spans:
 
 - Landing page and onboarding
-- Login, register, OAuth bridge, and password reset flows
+- Secure Authentication via Firebase (Email/Password, Google OAuth, GitHub OAuth)
 - Dashboard and workspace overview
 - Workspace list and creation
 - Upload and document processing screens
@@ -290,14 +292,8 @@ AstraFinance-AI/
 ├── frontend/
 │   ├── app/
 │   ├── components/
-│   ├── hooks/
 │   ├── lib/
-│   ├── public/
-│   ├── services/
-│   ├── store/
-│   ├── styles/
-│   ├── types/
-│   └── utils/
+│   └── public/
 ├── scripts/
 ├── docs/
 ├── datasets/
@@ -325,14 +321,18 @@ AstraFinance-AI/
 
 ---
 
-## Status Notes
+## Status & Progress
 
-This repository currently reads as a structured product and documentation scaffold. Some runtime manifest files are intentionally minimal, so the README is written to reflect the documented system and directory architecture rather than claiming a fully wired deployment that is not present in the repo yet.
+This repository is actively being developed. Here is a summary of what has been achieved so far:
 
-That makes the README useful in two ways:
+- **Frontend Foundation**: Fully functional Next.js App Router scaffold featuring a modern, Tailwind-based UI for dashboard and workspaces.
+- **Authentication**: Firebase Authentication is wired up for Email/Password, Google OAuth, and GitHub OAuth, syncing seamlessly with the backend.
+- **Workspace & Chat**: Users can create workspaces, view documents, and interact with the Research Agent via a rich chat interface.
+- **Multi-Modal Support**: The chat interface supports direct file and image attachments (via `multipart/form-data`) alongside text queries.
+- **Backend Scaffold**: FastAPI backend with MongoDB persistence, prepared with placeholder agent routing for extraction, red flags, and comparisons.
+- **Documentation**: Extensive architectural blueprints (DFDs, Sequence diagrams, PRDs) are available in the `docs/` folder.
 
-- It documents the intended product surface and architecture in one place.
-- It gives contributors a map of where each capability belongs in the codebase and documentation tree.
+For a more detailed developer track record, please see [MEMORY.md](MEMORY.md).
 
 ---
 
